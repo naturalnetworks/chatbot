@@ -206,7 +206,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
         # Format as mrkdwn
         wf_mrkdwn = f"""
 *{station_public_name} Tempest Weather Report*
-*Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Last Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv})
+*Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Last Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv}
         """
 
         response_blocks = [
