@@ -71,13 +71,14 @@ WF_STATION_ID: your_wf_station_id
 ### Deploy to your GCP project
 
 gcloud functions deploy chatbot \
---project your_project_id \
+--project smiling-spring-160808 \
 --gen2 \
 --runtime=python312 \
---region=your_preferred_gcp_region \
+--region=us-west1 \
 --source=. \
 --trigger-http \
+--entry-point=main \
 --env-vars-file .env.yaml \
 --allow-unauthenticated \
---memory 256Mi
+--memory=256Mi
 

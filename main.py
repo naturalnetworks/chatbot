@@ -31,6 +31,14 @@ app = App(
 handler = SlackRequestHandler(app)
 
 def adjust_markdown_for_slack(markdown_text):
+    # Identify code blocks and store them in a list
+    code_blocks = re.findall(r'```.*?```', markdown_text, flags=re.DOTALL)
+
+    # Replace code blocks with a placeholder to avoid modifications
+    for i, code_block in enumerate(code_blocks):
+        placeholder = f'__CODE_BLOCK_{i}__'
+        markdown_text = markdown_text.replace(code_block, placeholder)
+
     # Change double asterisks to single asterisks for emphasis
     markdown_text = re.sub(r'\*\*(.*?)\*\*', r'*\1*', markdown_text)
 
@@ -44,6 +52,10 @@ def adjust_markdown_for_slack(markdown_text):
 
     # Use a monospaced font for better table representation
     markdown_text = markdown_text.replace('|', '`|`')
+
+    # Restore code blocks from placeholders
+    for i, placeholder in enumerate(code_blocks):
+        markdown_text = markdown_text.replace(f'__CODE_BLOCK_{i}__', placeholder)
 
     return markdown_text
 
