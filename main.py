@@ -149,7 +149,7 @@ def bard_command(ack, respond, command):
 
 @app.command("/wf")
 def get_tempest_weather_mrkdwn(ack, respond):
-
+    ack()
     api_key = os.environ.get("WF_API_KEY")
     station_id = os.environ.get("WF_STATION_ID")
 
@@ -161,6 +161,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
         data = response.json()
 
         # Extract relevant weather data points
+        station_public_name = data["public_name"]
         temperature = data["obs"][0]["air_temperature"]
         feels_like = data["obs"][0]["feels_like"]
         humidity = data["obs"][0]["relative_humidity"]
@@ -195,8 +196,8 @@ def get_tempest_weather_mrkdwn(ack, respond):
 
         # Format as mrkdwn
         wf_mrkdwn = f"""
-*Ben's Tempest Weather Report*
-*Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv})
+*{station_public_name} Tempest Weather Report*
+*Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Last Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv})
         """
 
         response_blocks = [
