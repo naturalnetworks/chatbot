@@ -6,7 +6,7 @@ import functions_framework
 
 import google.generativeai as genai
 
-import mistune # This is used to convert markdown to mrkdwn
+import mistune
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "DEBUG"), format="%(levelname)s: %(message)s"
@@ -30,13 +30,12 @@ handler = SlackRequestHandler(app)
 
 class SlackMarkdownRenderer(mistune.Renderer):
     def block_code(self, code, lang):
-        return f"```{lang}\n{code}\n```"
+        return f"`{lang}\n{code}\n`"
+    # ... (add other methods to handle additional markdown elements as needed)
 
 def convert_to_slack_markdown(input_markdown):
-    renderer = SlackMarkdownRenderer()
-    markdown = mistune.Markdown(renderer=renderer)
-    
-    slack_markdown = markdown(input_markdown)
+    markdown = mistune.Markdown(renderer=SlackMarkdownRenderer())  # Instantiate Markdown object with renderer
+    slack_markdown = markdown(input_markdown)  # Use markdown object to convert input text
     return slack_markdown
 
 def get_user_info(user_id):
