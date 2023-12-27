@@ -2,4 +2,3 @@ slack_bolt
 google-cloud-functions
 google-generativeai
 functions-framework
-mistune
