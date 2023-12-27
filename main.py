@@ -6,6 +6,8 @@ import functions_framework
 
 import google.generativeai as genai
 
+import mistune # This is used to convert markdown to mrkdwn
+
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "DEBUG"), format="%(levelname)s: %(message)s"
 )
@@ -25,6 +27,17 @@ app = App(
 #    process_before_response=True,
 )
 handler = SlackRequestHandler(app)
+
+class SlackMarkdownRenderer(mistune.Renderer):
+    def block_code(self, code, lang):
+        return f"```{lang}\n{code}\n```"
+
+def convert_to_slack_markdown(input_markdown):
+    renderer = SlackMarkdownRenderer()
+    markdown = mistune.Markdown(renderer=renderer)
+    
+    slack_markdown = markdown(input_markdown)
+    return slack_markdown
 
 def get_user_info(user_id):
     """
@@ -58,7 +71,8 @@ def query_ai(respond, query):
                 max_output_tokens=800,
                 temperature=0.1)
             )
-        return ai_query_response.text
+        # return ai_query_response.text
+        return convert_to_slack_markdown(ai_query_response.text)
     except Exception as e:
         logging.error(f"query_ai returned: {e}")
         return "Error generating AI response. Please try again later."
