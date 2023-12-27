@@ -51,7 +51,13 @@ def query_ai(respond, query):
     :return: the generated response from the AI model
     """
     try:
-        ai_query_response = model.generate_content(query)
+        ai_query_response = model.generate_content(query,
+            generation_config=genai.types.GenerationConfig(
+                # Only one candidate for now.
+                candidate_count=1,
+                max_output_tokens=800,
+                temperature=0.1)
+            )
         return ai_query_response.text
     except Exception as e:
         logging.error(f"query_ai returned: {e}")
