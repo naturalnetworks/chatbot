@@ -24,6 +24,22 @@ The bot can fetch real-time weather reports from a WeatherFlow Tempest station u
 - Flask Functions Framework (`pip install functions-framework`)
 - Requests (`pip install requests`)
 
+## Setup Slack
+
+Create a new Slack App
+
+This will provide the Slack tokens/secrets etc. You will also need set up a Bot Token (xoxb-) and Bot Token Scopes - I set 'commands' and 'users:read'.
+
+Create two new slash commands, one for /bard and one for /wf
+
+The URL for the above slash commands will be provided when you deploy the Google Cloud Function. Be sure to append /slack/events on the end. EG
+
+https://australia-southeast1-tasty-koala-123456.cloudfunctions.net/chatbot/slack/events
+
+## Get a Google AI key
+
+Go to https://ai.google.dev/tutorials/setup and click "Get an API key" and then "Create API key in new project" . Fill out the details as you see fit.
+
 ### Environment Variables
 
 Make sure to set the following environment variables:
@@ -34,7 +50,7 @@ Make sure to set the following environment variables:
 - `WF_API_KEY`: API key for the WeatherFlow API.
 - `WF_STATION_ID`: WeatherFlow Tempest station ID.
 
-## Usage
+### Usage
 
 1. Clone the repository:
 
@@ -46,11 +62,11 @@ Make sure to set the following environment variables:
 
 Create .env.yaml, add
 
-GEMINI_API_KEY: your_gemini_api_key
-SLACK_BOT_TOKEN: your_slack_bot_token
-SLACK_SIGNING_SECRET: your_slack_signing_secret
-WF_API_KEY: your_wf_api_key
-WF_STATION_ID: your_wf_station_id
+GEMINI_API_KEY: your_gemini_api_key \
+SLACK_BOT_TOKEN: your_slack_bot_token \
+SLACK_SIGNING_SECRET: your_slack_signing_secret \
+WF_API_KEY: your_wf_api_key \
+WF_STATION_ID: your_wf_station_id 
 
 ## Deploy to your GCP project
 
@@ -65,14 +81,3 @@ gcloud functions deploy chatbot \
 --allow-unauthenticated \
 --memory 256Mi
 
-## Setup Slack
-
-Create a new Slack App
-
-This will provide the Slack tokens/secrets etc. You will also need set up a Bot Token (xoxb-) and Bot Token Scopes - I set 'commands' and 'users:read'.
-
-Create two new slash commands, one for /bard and one for /wf
-
-The URL for the above slash commands will be provided when you deploy the Google Cloud Function. Be sure to append /slack/events on the end. EG
-
-https://australia-southeast1-tasty-koala-123456.cloudfunctions.net/chatbot/slack/events
