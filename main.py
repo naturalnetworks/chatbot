@@ -11,7 +11,7 @@ import re # need regular expressions to adapt markdown to mrkdwn...
 import requests # need this to interrogate WeatherFlow API
 
 logging.basicConfig(
-    level=os.getenv("LOG_LEVEL", "DEBUG"), format="%(levelname)s: %(message)s"
+    level=os.getenv("LOG_LEVEL", "ERROR"), format="%(levelname)s: %(message)s"
 )
 
 # Instantiate the Google Gemini API
