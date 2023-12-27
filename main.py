@@ -149,6 +149,15 @@ def bard_command(ack, respond, command):
 
 @app.command("/wf")
 def get_tempest_weather_mrkdwn(ack, respond):
+    """
+    Generates a Weatherflow Tempest weather report in mrkdwn format and sends it as a response.
+
+    Parameters:
+    - ack: A function used to acknowledge the request.
+    - respond: A function used to send the response.
+
+    This function sends a formatted response message to the slack bot.
+    """
     ack()
     api_key = os.environ.get("WF_API_KEY")
     station_id = os.environ.get("WF_STATION_ID")
