@@ -24,7 +24,7 @@ The bot can fetch real-time weather reports from a WeatherFlow Tempest station u
 - Flask Functions Framework (`pip install functions-framework`)
 - Requests (`pip install requests`)
 
-## Setup Slack
+### Setup Slack
 
 Create a new Slack App
 
@@ -36,7 +36,7 @@ The URL for the above slash commands will be provided when you deploy the Google
 
 https://australia-southeast1-tasty-koala-123456.cloudfunctions.net/chatbot/slack/events
 
-## Get a Google AI key
+### Get a Google AI key
 
 Go to https://ai.google.dev/tutorials/setup and click "Get an API key" and then "Create API key in new project" . Fill out the details as you see fit.
 
@@ -58,7 +58,7 @@ Make sure to set the following environment variables:
    git clone https://github.com/naturalnetworks/chatbot.git
    cd chatbot
 
-## Set up Environment Variables
+### Set up Environment Variables
 
 Create .env.yaml, add
 
@@ -68,7 +68,7 @@ SLACK_SIGNING_SECRET: your_slack_signing_secret \
 WF_API_KEY: your_wf_api_key \
 WF_STATION_ID: your_wf_station_id 
 
-## Deploy to your GCP project
+### Deploy to your GCP project
 
 gcloud functions deploy chatbot \
 --project your_project_id \
