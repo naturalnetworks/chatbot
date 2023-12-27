@@ -153,7 +153,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
     api_key = os.environ.get("WF_API_KEY")
     station_id = os.environ.get("WF_STATION_ID")
 
-    url = f"https://api.tempestwx.com/api/v1/devices/{station_id}/observations/latest"
+    url = f'https://swd.weatherflow.com/swd/rest/observations/station/{wf_station_id}?api_key={wf_api_key}'
     headers = {"Authorization": f"Bearer {api_key}"}
     response = requests.get(url, headers=headers)
 
