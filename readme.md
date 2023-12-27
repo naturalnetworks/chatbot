@@ -71,10 +71,10 @@ WF_STATION_ID: your_wf_station_id
 ### Deploy to your GCP project
 
 gcloud functions deploy chatbot \
---project smiling-spring-160808 \
+--project PROJECT_ID \
 --gen2 \
 --runtime=python312 \
---region=us-west1 \
+--region=REGION \
 --source=. \
 --trigger-http \
 --entry-point=main \
