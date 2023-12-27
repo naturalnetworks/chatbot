@@ -35,11 +35,12 @@ def get_user_info(user_id):
     :return: The normalized real name of the user.
     :rtype: str
     """
-    # logging.info("get_user_info received: " + str(user_id))
-    # Retrieve user information
-    user_info = app.client.users_info(user=user_id)
-    # logging.info("get_user_info returned: " + str(user_info))
-    return user_info["user"]["profile"]["real_name_normalized"]
+    try:
+        user_info = app.client.users_info(user=user_id)
+        return user_info["user"]["profile"]["real_name_normalized"]
+    except Exception as e:
+        logging.error(f"get_user_info returned: {e}")
+        return "Unknown User"
 
 def query_ai(respond, query):
     """
@@ -49,10 +50,12 @@ def query_ai(respond, query):
     :param query: the query to be processed by the AI model
     :return: the generated response from the AI model
     """
-#    logging.info("query_ai received: " + str(query))
-    ai_query_response = model.generate_content(query)
-#    logging.info("query_ai returned: " + ai_query_response.text)
-    return ai_query_response.text
+    try:
+        ai_query_response = model.generate_content(query)
+        return ai_query_response.text
+    except Exception as e:
+        logging.error(f"query_ai returned: {e}")
+        return "Error generating AI response. Please try again later."
 
 # Bard slash command
 @app.command("/bard")
