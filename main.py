@@ -10,6 +10,9 @@ import re # need regular expressions to adapt markdown to mrkdwn...
 
 import requests # need this to interrogate WeatherFlow API
 
+# Create a global HTTP session for connection pooling
+http_session = requests.Session()
+
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "ERROR"), format="%(levelname)s: %(message)s"
 )
@@ -21,6 +24,13 @@ genai.configure(api_key=gemini_api_key)
 # gemini-pro: optimized for text-only prompts.
 # gemini-pro-vision: optimized for text-and-images prompts.
 model = genai.GenerativeModel('gemini-pro')
+
+# Gemini Chat Conversations 
+chat = model.start_chat(history=[])
+
+# WeatherFlow API key and Station ID
+api_key = os.environ.get("WF_API_KEY")
+station_id = os.environ.get("WF_STATION_ID")
 
 # instantiate the Slack app
 app = App(
@@ -84,13 +94,16 @@ def query_ai(respond, query):
     :return: the generated response from the AI model
     """
     try:
-        ai_query_response = model.generate_content(query,
+#        ai_query_response = model.generate_content(
+        ai_query_response = chat.send_message(
+            query,
             generation_config=genai.types.GenerationConfig(
                 # Only one candidate for now.
                 candidate_count=1,
                 max_output_tokens=800,
                 temperature=0.1)
             )
+        # logging.debug(f"query_ai returned: {ai_query_response.text}")
         # return ai_query_response.text
         return adjust_markdown_for_slack(ai_query_response.text)
        
@@ -171,12 +184,12 @@ def get_tempest_weather_mrkdwn(ack, respond):
     This function sends a formatted response message to the slack bot.
     """
     ack()
-    api_key = os.environ.get("WF_API_KEY")
-    station_id = os.environ.get("WF_STATION_ID")
 
     url = f'https://swd.weatherflow.com/swd/rest/observations/station/{station_id}?api_key={api_key}'
     headers = {"Authorization": f"Bearer {api_key}"}
-    response = requests.get(url, headers=headers)
+    
+    # Use the global session for making the HTTP request
+    response = http_session.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
