@@ -20,12 +20,22 @@ gcloud functions deploy chatbot \
 --entry-point=main \
 --env-vars-file .env.yaml \
 --allow-unauthenticated \
---memory=256Mi
+--memory=256Mi \
 --min-instances=1
 
 See https://cloud.google.com/functions/docs/configuring/min-instances for more information.
 
 Note that this will cost money as it will no longer be 'free tier' usage.
+
+While you're looking at instance counts, maybe specify --max-instances too - by default a 2nd generation cloud function will set 100. A request will be held for 30 seconds while waiting for an instance to become available.
+
+See https://cloud.google.com/functions/docs/configuring/max-instances for more information.
+
+### API Keys and Secrets
+
+In this case Environment Variables are being used - not particularly good practice, it's simple but not scalable.
+
+Better to use Google's Secret Manager, see https://cloud.google.com/functions/docs/configuring/secrets
 
 ## Features
 
@@ -38,6 +48,10 @@ The bot can generate responses to user queries using the Google Gemini API. The 
 The bot can fetch real-time weather reports from a WeatherFlow Tempest station using the WeatherFlow API. The weather report is formatted in `mrkdwn` for easy readability.
 
 ## Setup
+
+### Google Compute Platform
+
+Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python to get an idea on what's required to set up GCP to host your Cloud Function.
 
 ### Dependencies
 

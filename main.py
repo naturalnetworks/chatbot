@@ -8,10 +8,7 @@ import google.generativeai as genai
 
 import re # need regular expressions to adapt markdown to mrkdwn...
 
-import requests # need this to interrogate WeatherFlow API
-
-# Create a global HTTP session for connection pooling
-http_session = requests.Session()
+import requests # needed for WeatherFlow API
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "ERROR"), format="%(levelname)s: %(message)s"
@@ -32,6 +29,9 @@ chat = model.start_chat(history=[])
 api_key = os.environ.get("WF_API_KEY")
 station_id = os.environ.get("WF_STATION_ID")
 
+# Create a global HTTP session for connection pooling/persistence
+http_session = requests.Session()
+
 # instantiate the Slack app
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
@@ -41,6 +41,23 @@ app = App(
 handler = SlackRequestHandler(app)
 
 def adjust_markdown_for_slack(markdown_text):
+    """
+    Adjusts the given markdown text to be compatible with Slack's mrkdwn format.
+
+    Parameters:
+    - markdown_text (str): The original markdown text to be adjusted.
+
+    Returns:
+    - str: The adjusted markdown text.
+
+    Example:
+    ```
+    original_text = "# Hello, world!"
+    adjusted_text = adjust_markdown_for_slack(original_text)
+    print(adjusted_text)
+    # Output: "*Hello, world!*"
+    ```
+    """
     # Identify code blocks and store them in a list
     code_blocks = re.findall(r'```.*?```', markdown_text, flags=re.DOTALL)
 
@@ -92,6 +109,11 @@ def query_ai(respond, query):
     :param respond: a function to handle the response
     :param query: the query to be processed by the AI model
     :return: the generated response from the AI model
+
+    The Ai query can be adjusted via parameters
+    Refer to https://ai.google.dev/models/gemini#model_attributes and 
+    https://ai.google.dev/docs/concepts#model_parameters .
+
     """
     try:
 #        ai_query_response = model.generate_content(
