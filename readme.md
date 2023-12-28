@@ -4,6 +4,29 @@ This repository contains a Slack bot implemented in Python using the Slack Bolt 
 
 It is designed to run as a Google Cloud Function.
 
+## Notes
+
+### Cloud Function Cold Starts
+
+Google Cloud Functions will close down and cause a 'cold start' upon next trigger. This exhibits as occasional latency when calling /bard or /wf . The way around this is to set the minimum instances to something more than 0. E.G:
+
+gcloud functions deploy chatbot \
+--project PROJECT_ID \
+--gen2 \
+--runtime=python312 \
+--region=REGION \
+--source=. \
+--trigger-http \
+--entry-point=main \
+--env-vars-file .env.yaml \
+--allow-unauthenticated \
+--memory=256Mi
+--min-instances=1
+
+See https://cloud.google.com/functions/docs/configuring/min-instances for more information.
+
+Note that this will cost money as it will no longer be 'free tier' usage.
+
 ## Features
 
 ### 1. AI Text Generation
