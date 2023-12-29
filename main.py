@@ -29,7 +29,8 @@ api_key = os.environ.get("WF_API_KEY")
 station_id = os.environ.get("WF_STATION_ID")
 
 # Create a global HTTP session for connection pooling/persistence
-# Enable this if you're running idle functions
+# Enable this if you're running idle functions, don't forget to change
+# the /wf function to use it
 # import requests # needed for WeatherFlow API
 # http_session = requests.Session()
 
