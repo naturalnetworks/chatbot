@@ -99,7 +99,7 @@ Make sure to set the following environment variables:
 
    ```python3 -m venv .venv
       source .venv/bin/activate
-      pip install -r requirements.txt -t libs```
+      pip install -r requirements.txt```
 
 ### Set up Environment Variables
 
