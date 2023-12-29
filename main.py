@@ -240,7 +240,9 @@ def get_tempest_weather_mrkdwn(ack, respond):
     headers = {"Authorization": f"Bearer {api_key}"}
     
     # Use the global session for making the HTTP request
-    response = http_session.get(url, headers=headers)
+    # response = http_session.get(url, headers=headers)
+
+    response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
