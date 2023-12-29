@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 import re # need regular expressions to adapt markdown to mrkdwn...
 import functions_framework # this is included in GCP Cloud Functions
 
@@ -172,9 +173,18 @@ def bard_command(ack, respond, command):
     query = command["text"]
     user_id = command["user_id"]
 
+    # Record start time   
+    start_time = time.time()
+
     username = get_user_info(user_id)
 
     ai_response = query_ai(respond, query)
+
+    # Record end time
+    end_time = time.time()
+
+    # Calculate total execution time
+    execution_time = end_time - start_time
 
     # Construct blocks for the Slack response
     response_blocks = [
@@ -182,7 +192,7 @@ def bard_command(ack, respond, command):
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}"
+                "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds"
             }
         }
     ]
@@ -190,7 +200,7 @@ def bard_command(ack, respond, command):
     # Use the app's respond method to send the response with blocks and fallback text
     respond({
         "response_type": "in_channel",
-        "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}",  # Fallback text
+        "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds",  # Fallback text
         "blocks": response_blocks
     })
 
@@ -206,6 +216,10 @@ def get_tempest_weather_mrkdwn(ack, respond):
     This function sends a formatted response message to the slack bot.
     """
     ack()
+
+    # Record start time
+    start_time = time.time()
+
     import requests # needed for WeatherFlow API
     url = f'https://swd.weatherflow.com/swd/rest/observations/station/{station_id}?api_key={api_key}'
     headers = {"Authorization": f"Bearer {api_key}"}
@@ -256,12 +270,18 @@ def get_tempest_weather_mrkdwn(ack, respond):
 *Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Last Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv}
         """
 
+    # Record end time
+    end_time = time.time()
+
+    # Calculate total execution time
+    execution_time = end_time - start_time
+
         response_blocks = [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{wf_mrkdwn}"
+                    "text": f"{wf_mrkdwn}\n\nExecution Time: {execution_time:.2f} seconds"
                 }
             }
         ]
@@ -269,7 +289,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
         # Use the app's respond method to send the response with blocks and fallback text
         respond({
             "response_type": "in_channel",
-            "text": f"{wf_mrkdwn}",  # Fallback text
+            "text": f"{wf_mrkdwn}\n\nExecution Time: {execution_time:.2f} seconds",  # Fallback text
             "blocks": response_blocks
         })
     else:
