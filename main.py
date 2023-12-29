@@ -200,7 +200,7 @@ def bard_command(ack, respond, command):
     # Use the app's respond method to send the response with blocks and fallback text
     respond({
         "response_type": "in_channel",
-        "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds",  # Fallback text
+        "text": f"{username} asked \"{query}\".\n\n\nGenerated response:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds",  # Fallback text
         "blocks": response_blocks
     })
 
@@ -270,11 +270,11 @@ def get_tempest_weather_mrkdwn(ack, respond):
 *Temperature/Feels Like:* {temperature}°C/{feels_like}°C | *Humidity:* {humidity}% | *Wind Gust/Direction:* {wind_gust}km/h - {wind_direction} | *Pressure:* {pressure} mb | *Rain Rate/Accumlated:* {rain_rate}mm/hr/{rain_accumlated}mm | *Last Lightning Strike Distance:* {lightning_strike_distance}km | *Solar Radiation:* {solar_radiation}W/m^2 | *UV Index:* {uv}
         """
 
-    # Record end time
-    end_time = time.time()
+        # Record end time
+        end_time = time.time()
 
-    # Calculate total execution time
-    execution_time = end_time - start_time
+        # Calculate total execution time
+        execution_time = end_time - start_time
 
         response_blocks = [
             {
