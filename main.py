@@ -189,11 +189,26 @@ def bard_command(ack, respond, command):
     # Construct blocks for the Slack response
     response_blocks = [
         {
+            "type": "divider"
+        },
+        {   "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*{username}* asked \"_{query}_\"."
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"{username} asked \"{query}\".\nGenerated response:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds"
+                "text": f"*Generated response*:\n{ai_response}\n\nExecution Time: {execution_time:.2f} seconds"
             }
+        },
+        {
+            "type": "divider"
         }
     ]
 
