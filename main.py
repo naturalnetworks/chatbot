@@ -1,14 +1,17 @@
 import os
 import logging
-from slack_bolt import App
-from slack_bolt.adapter.flask import SlackRequestHandler
-import functions_framework
-
-import google.generativeai as genai
-
 import re # need regular expressions to adapt markdown to mrkdwn...
 
-import requests # needed for WeatherFlow API
+# Import modules from the local libs directory
+# These can be downloaded/installed using:
+#  'pip install -r requirements.txt -t libs'
+# This saves Cloud Function cold start time
+import libs.requests # needed for WeatherFlow API
+from libs.slack_bolt import App
+from libs.slack_bolt.adapter.flask import SlackRequestHandler
+import libs.functions_framework
+
+import libs.google.generativeai as genai
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "ERROR"), format="%(levelname)s: %(message)s"

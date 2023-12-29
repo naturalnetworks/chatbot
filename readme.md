@@ -56,10 +56,10 @@ Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python
 ### Dependencies
 
 - Python 3.x
-- Slack Bolt (`pip install slack-bolt`)
-- Google Generative AI (`pip install google-generativeai`)
-- Flask Functions Framework (`pip install functions-framework`)
-- Requests (`pip install requests`)
+- Slack Bolt
+- Google Generative AI
+- Functions Framework
+- Requests
 
 ### Setup Slack
 
@@ -93,7 +93,13 @@ Make sure to set the following environment variables:
 
    ```bash
    git clone https://github.com/naturalnetworks/chatbot.git
-   cd chatbot
+   cd chatbot```
+
+2. Download/Install python libraries locally:
+
+   ```python3 -m venv .venv
+      source .venv/bin/activate
+      pip install -r requirements.txt -t libs```
 
 ### Set up Environment Variables
 
