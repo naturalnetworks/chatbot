@@ -2,7 +2,6 @@ import os
 import logging
 import re # need regular expressions to adapt markdown to mrkdwn...
 import functions_framework # this is included in GCP Cloud Functions
-import requests # needed for WeatherFlow API
 
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
@@ -29,7 +28,9 @@ api_key = os.environ.get("WF_API_KEY")
 station_id = os.environ.get("WF_STATION_ID")
 
 # Create a global HTTP session for connection pooling/persistence
-http_session = requests.Session()
+# Enable this if you're running idle functions
+# import requests # needed for WeatherFlow API
+# http_session = requests.Session()
 
 # instantiate the Slack app
 app = App(
@@ -205,7 +206,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
     This function sends a formatted response message to the slack bot.
     """
     ack()
-
+    import requests # needed for WeatherFlow API
     url = f'https://swd.weatherflow.com/swd/rest/observations/station/{station_id}?api_key={api_key}'
     headers = {"Authorization": f"Bearer {api_key}"}
     
