@@ -31,6 +31,8 @@ While you're looking at instance counts, maybe specify --max-instances too - by 
 
 See https://cloud.google.com/functions/docs/configuring/max-instances for more information.
 
+> I've included instructions below on how to deploy this as a 'Cloud Run' service which offers up better cold start performance
+
 ### API Keys and Secrets
 
 In this case Environment Variables are being used - not particularly good practice, it's simple but not scalable.
