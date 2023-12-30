@@ -316,7 +316,7 @@ def get_tempest_weather_mrkdwn(ack, respond):
             "text": "Could not retrieve weather data."
         })
 
-# Entry point function for Functions Framework
+# Entry point function for Functions Framework when running on GCP Cloud Functions
 @functions_framework.http
 def main(request):
     return handler.handle(request)

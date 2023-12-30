@@ -111,10 +111,10 @@ SLACK_SIGNING_SECRET: your_slack_signing_secret \
 WF_API_KEY: your_wf_api_key \
 WF_STATION_ID: your_wf_station_id 
 
-### Deploy to your GCP project
+### Deploy to your GCP project to Cloud Functions
 
 gcloud functions deploy chatbot \
---project PROJECT_ID \
+--project-PROJECT_ID \
 --gen2 \
 --runtime=python312 \
 --region=REGION \
@@ -125,3 +125,23 @@ gcloud functions deploy chatbot \
 --allow-unauthenticated \
 --memory=256Mi
 
+### Alternatively, you can build a docker image and use Cloud Run
+
+**Create repository to store image**
+gcloud artifacts repositories create docker-repo \
+--project=PROJECT_ID
+--repository-format=docker \
+--location=REGION \
+--description="Docker Images" \
+
+**Use GCP's cloud based image building service to create the docker image**
+gcloud builds submit \
+--pack image-us-west2-docker.pkg.dev/PROJECT_ID/docker-repo/bardbot,env=GOOGLE_FUNCTION_TARGET=main
+
+**Deploy the new Cloud Run service using the image**
+gcloud run deploy bardbot \
+--image us-west2-docker.pkg.dev/PROJECT_ID/docker-repo/bardbot:latest \
+--region=us-west2 \
+--platform=managed \
+--env-vars-file=.env.yml \
+--allow-unauthenticated
