@@ -116,8 +116,23 @@ GEMINI_API_KEY: your_gemini_api_key \
 SLACK_BOT_TOKEN: your_slack_bot_token \
 SLACK_SIGNING_SECRET: your_slack_signing_secret \
 WF_API_KEY: your_wf_api_key \
-WF_STATION_ID: your_wf_station_id
+WF_STATION_ID: your_wf_station_id \
+SLACK_CLIENT_ID: your_slack_client_id \
+SLACK_CLIENT_SECRET: your_slack_client_secret \
+GCS_BUCKET_NAME: globally unique name 
 ```
+
+### Create a Google Cloud Storage bucket
+
+Here the --location is set to a region, by default it is 'us' and will be multi-region replication. \
+Single region means cheaper although not as available as the multi-region/dual-region.
+
+```
+gcloud storage buckets create gs://<GCS_BUCKET_NAME>  \
+--region=REGION
+--location=REGION
+```
+Make sure the name matches what has been set in the environment variable GCS_BUCKET_NAME.
 
 ### Deploy to your GCP project to Cloud Functions
 
@@ -137,7 +152,7 @@ gcloud functions deploy chatbot \
 
 ### Alternatively, you can build a docker image and use Cloud Run
 
-**Create repository to store image** \
+**Create repository to store image**
 ```
 gcloud artifacts repositories create docker-repo \
 --project=PROJECT_ID
@@ -146,13 +161,13 @@ gcloud artifacts repositories create docker-repo \
 --description="Docker Images"
 ```
 
-**Use GCP's cloud based image building service to create the docker image** \
+**Use GCP's cloud based image building service to create the docker image**
 ```
 gcloud builds submit \
 --pack image-us-west2-docker.pkg.dev/PROJECT_ID/docker-repo/bardbot,env=GOOGLE_FUNCTION_TARGET=main
 ```
 
-**Deploy the new Cloud Run service using the image** \
+**Deploy the new Cloud Run service using the image**
 ```
 gcloud run deploy bardbot \
 --image us-west2-docker.pkg.dev/PROJECT_ID/docker-repo/bardbot:latest \
@@ -161,3 +176,6 @@ gcloud run deploy bardbot \
 --env-vars-file=.env.yml \
 --allow-unauthenticated
 ```
+### Install the Slack App
+
+Either deployment method will provide a URL for the application. Go to https://<URL>/slack/install and click the button and accept the permissions to install the App into your Slack workspace.

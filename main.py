@@ -5,10 +5,9 @@ import logging
 # Import third-party modules
 from slack_bolt import App
 from slack_bolt.oauth.oauth_settings import OAuthSettings
-from slack_sdk.oauth.installation_store import FileInstallationStore
-from slack_sdk.oauth.state_store import FileOAuthStateStore
-import google.generativeai as genai
 from slack_bolt.adapter.flask import SlackRequestHandler
+from slack_sdk.oauth.state_store import FileOAuthStateStore
+
 import functions_framework
 
 # Import local modules
@@ -24,7 +23,7 @@ logging.basicConfig(
 )
 
 # Your Google Cloud Storage bucket name
-GCS_BUCKET_NAME = "bard-chat-bot-20240101"
+GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 
 # Setup slack_bolt instance
 
