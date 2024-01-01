@@ -4,6 +4,9 @@ import logging
 
 # Import third-party modules
 from slack_bolt import App
+from slack_bolt.oauth.oauth_settings import OAuthSettings
+from slack_sdk.oauth.installation_store import FileInstallationStore
+from slack_sdk.oauth.state_store import FileOAuthStateStore
 import google.generativeai as genai
 from slack_bolt.adapter.flask import SlackRequestHandler
 import functions_framework
@@ -19,9 +22,20 @@ logging.basicConfig(
 )
 
 # Setup slack_bolt instance
+
+# OAuth settings see https://slack.dev/bolt-python/concepts#authenticating-oauth
+slack_oauth_settings = OAuthSettings(
+    client_id=os.environ["SLACK_CLIENT_ID"],
+    client_secret=os.environ["SLACK_CLIENT_SECRET"],
+    scopes=["channels:read", "channels:history", "commands", "users:read"],
+    installation_store=FileInstallationStore(base_dir="/tmp"),
+    state_store=FileOAuthStateStore(expiration_seconds=600, base_dir="/tmp")
+)
+
 app = App(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    oauth_settings=slack_oauth_settings,
 #    process_before_response=True,
 )
 handler = SlackRequestHandler(app)
@@ -77,10 +91,10 @@ def wf_command(ack, respond, command):
     station_id = wf_station_id
 
     if command["text"] is not None and command["text"] != "":
-        logging.info("wf_command received: %s", command["text"])
+        logging.debug("wf_command received: %s", command["text"])
         station_id = command["text"]
     else:
-        logging.info("wf_command received nothing, using station_id: %s", station_id)
+        logging.debug("wf_command received nothing, using station_id: %s", station_id)
         
     wf_response = weatherflow_instance.get_wf_weather(station_id=station_id)
 
