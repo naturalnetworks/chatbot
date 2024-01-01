@@ -88,6 +88,9 @@ Make sure to set the following environment variables:
 - `SLACK_SIGNING_SECRET`: Slack app signing secret.
 - `WF_API_KEY`: API key for the WeatherFlow API.
 - `WF_STATION_ID`: WeatherFlow Tempest station ID.
+- `SLACK_CLIENT_ID`: Slack App Client ID.
+- `SLACK_CLIENT_SECRET`: Slack App Client Secret.
+- `GCS_BUCKET_NAME`: Globally Inique Name for Google Cloud Storage Bucket. 
 
 ### Usage
 
@@ -99,13 +102,22 @@ Make sure to set the following environment variables:
    cd chatbot
    ```
 
-2. Download/Install python libraries locally:
+2. (Optional) Download/Install python libraries locally:
 
    ```
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
+   This creates a python virtual environment and installs the necessary python libraries.
+
+   You will be able to test the bot locally using: \
+   ```
+   export ATTRIBUTE=VALUE # for each of the environment variables, see below
+   functions-framework --source ./main.py --target=main --debug
+   ngrok http 8080
+   ```
+   See https://ngrok.com/ to sign up and use their free tier service.
 
 ### Set up Environment Variables
 
@@ -121,6 +133,7 @@ SLACK_CLIENT_ID: your_slack_client_id \
 SLACK_CLIENT_SECRET: your_slack_client_secret \
 GCS_BUCKET_NAME: globally unique name 
 ```
+This is called during the deploy/build gcloud commands and creates the environment variables used with in the app.
 
 ### Create a Google Cloud Storage bucket
 
@@ -132,13 +145,14 @@ gcloud storage buckets create gs://<GCS_BUCKET_NAME>  \
 --region=REGION
 --location=REGION
 ```
-Make sure the name matches what has been set in the environment variable GCS_BUCKET_NAME.
+Make sure the name matches what has been set in the environment variable GCS_BUCKET_NAME. \
+See https://cloud.google.com/storage/docs/creating-buckets
 
 ### Deploy to your GCP project to Cloud Functions
 
 ```
 gcloud functions deploy chatbot \
---project-PROJECT_ID \
+--project=PROJECT_ID \
 --gen2 \
 --runtime=python312 \
 --region=REGION \
@@ -149,6 +163,8 @@ gcloud functions deploy chatbot \
 --allow-unauthenticated \
 --memory=256Mi
 ```
+This deploys (or updates) a Google Cloud Function. \
+See https://cloud.google.com/sdk/gcloud/reference/functions/deploy
 
 ### Alternatively, you can build a docker image and use Cloud Run
 
@@ -160,12 +176,14 @@ gcloud artifacts repositories create docker-repo \
 --location=REGION \
 --description="Docker Images"
 ```
+See https://cloud.google.com/sdk/gcloud/reference/artifacts/repositories/create
 
 **Use GCP's cloud based image building service to create the docker image**
 ```
 gcloud builds submit \
 --pack image-us-west2-docker.pkg.dev/PROJECT_ID/docker-repo/bardbot,env=GOOGLE_FUNCTION_TARGET=main
 ```
+See https://cloud.google.com/sdk/gcloud/reference/builds/submit
 
 **Deploy the new Cloud Run service using the image**
 ```
@@ -176,6 +194,8 @@ gcloud run deploy bardbot \
 --env-vars-file=.env.yml \
 --allow-unauthenticated
 ```
+See https://cloud.google.com/sdk/gcloud/reference/run/deploy
+
 ### Install the Slack App
 
 Either deployment method will provide a URL for the application. Go to https://<URL>/slack/install and click the button and accept the permissions to install the App into your Slack workspace.
