@@ -15,11 +15,16 @@ import functions_framework
 from libs.gemini_ai import GeminiAI
 from libs.weatherflow import WeatherFlow
 from libs.slack import Slack
+from libs.google_storage import GCPStorageInstallationStore
+
 
 # Setup logging
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"), format="%(levelname)s: %(message)s"
 )
+
+# Your Google Cloud Storage bucket name
+GCS_BUCKET_NAME = "bard-chat-bot-20240101"
 
 # Setup slack_bolt instance
 
@@ -28,7 +33,8 @@ slack_oauth_settings = OAuthSettings(
     client_id=os.environ["SLACK_CLIENT_ID"],
     client_secret=os.environ["SLACK_CLIENT_SECRET"],
     scopes=["channels:read", "channels:history", "commands", "users:read"],
-    installation_store=FileInstallationStore(base_dir="/tmp"),
+    # installation_store=FileInstallationStore(base_dir="/tmp"),
+    installation_store=GCPStorageInstallationStore(bucket_name=GCS_BUCKET_NAME,client_id=os.environ["SLACK_CLIENT_ID"]),
     state_store=FileOAuthStateStore(expiration_seconds=600, base_dir="/tmp")
 )
 
@@ -53,7 +59,7 @@ weatherflow_instance = WeatherFlow(wf_api_key=wf_api_key)
 slack_instance = Slack()
 
 @app.command("/bard")
-@app.command("/bardtest")
+@app.command("/zbard")
 def bard_command(ack, respond, command):
     ack()
     query = command["text"]
@@ -84,7 +90,7 @@ def bard_command(ack, respond, command):
 
 
 @app.command("/wf")
-@app.command("/wftest")
+@app.command("/zwf")
 def wf_command(ack, respond, command):
     ack()
 
