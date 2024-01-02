@@ -124,15 +124,32 @@ def wf_command(ack, respond, command):
 # Slack Messages and Events
 ##############
 @app.message("bard")
-def bard_say(message, say):
-    query = message["text"]
-    user_id = message["user"]
+@app.event("app_mention")
+def bard_say(message, say, event):
+    if message:
+        query = message.get("text", None)
+        user_id = message.get("user", "")
+    elif event:
+        query = event.get("text", None)
+        user_id = event.get("user", "")
+    else:
+        say({
+            "response_type": "in_channel",
+            "text": "Hi :wave:"
+        })
+        return
 
-    ai_response = gemini_ai_instance.query_ai(query)
+    if query:
+        ai_response = gemini_ai_instance.query_ai(query)
 
-    formatted_response = slack_instance.format_response(f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}")
+    # Check if user_id is not an empty string before formatting the response
+    if user_id:
+        formatted_response = slack_instance.format_response(f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}")
+    else:
+        # Handle the case where user_id is an empty string
+        formatted_response = slack_instance.format_response(ai_response)
 
-    slack_message = formatted_response   
+    slack_message = formatted_response
 
     logging.info(slack_message)
     
@@ -147,7 +164,6 @@ def bard_say(message, say):
 
 # Handle events
 @app.event("message")
-@app.event("app_mention")
 def handle_message_events(body):
     logging.debug(body)
 
