@@ -16,21 +16,60 @@ from libs.weatherflow import WeatherFlow
 from libs.slack import Slack
 from libs.google_storage import GCPStorageInstallationStore
 
-
 # Setup logging
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"), format="%(levelname)s: %(message)s"
 )
 
+# Gather environment variables and configure
+#######################################
+
 # Your Google Cloud Storage bucket name
-GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+
+# Your WeatherFlow station ID and API key
+WF_API_KEY = os.getenv('WF_API_KEY')
+WF_STATION_ID = os.getenv('WF_STATION_ID', '41817') # Defaults to Antartica
+
+# Your Slack ID's, Tokens, and Secrets
+SLACK_CLIENT_ID = os.getenv('SLACK_CLIENT_ID')
+SLACK_CLIENT_SECRET = os.getenv('SLACK_CLIENT_SECRET')
+SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN')
+SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
+
+# Your Gemini API key and Settings
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+GEMINI_CANDIDATE_COUNT = os.getenv('CANDIDATE_COUNT') # Optional
+GEMINI_MAX_OUTPUT_TOKENS = os.getenv('MAX_OUTPUT_TOKENS') # Optional
+GEMINI_TEMPERATURE = os.getenv('TEMPERATURE') # Optional
+
+# Validate that variables have values
+missing_variables = [var_name for var_name, var in
+    {'GCS_BUCKET_NAME': GCS_BUCKET_NAME,
+        'WF_API_KEY': WF_API_KEY,
+        'WF_STATION_ID': WF_STATION_ID,
+        'SLACK_CLIENT_ID': SLACK_CLIENT_ID,
+        'SLACK_CLIENT_SECRET': SLACK_CLIENT_SECRET,
+        'SLACK_BOT_TOKEN': SLACK_BOT_TOKEN,
+        'SLACK_SIGNING_SECRET': SLACK_SIGNING_SECRET,
+        'GEMINI_API_KEY': GEMINI_API_KEY}.items() if var is None or var == '']
+
+if missing_variables:
+    logging.error(
+        "Error: The following configuration variables are missing or empty: %s", 
+            ', '.join(missing_variables)
+            )
+    exit(1)
+
+
 
 # Setup slack_bolt instance
+#######################################
 
 # OAuth settings see https://slack.dev/bolt-python/concepts#authenticating-oauth
 slack_oauth_settings = OAuthSettings(
-    client_id=os.environ["SLACK_CLIENT_ID"],
-    client_secret=os.environ["SLACK_CLIENT_SECRET"],
+    client_id=SLACK_CLIENT_ID,
+    client_secret=SLACK_CLIENT_SECRET,
     scopes=[
         "channels:read", 
         "channels:history", 
@@ -41,30 +80,41 @@ slack_oauth_settings = OAuthSettings(
         "im:history",
         ],
     # installation_store=FileInstallationStore(base_dir="/tmp"),
-    installation_store=GCPStorageInstallationStore(bucket_name=GCS_BUCKET_NAME,client_id=os.environ["SLACK_CLIENT_ID"]),
+    installation_store=GCPStorageInstallationStore(bucket_name=GCS_BUCKET_NAME,client_id=SLACK_CLIENT_ID),
     state_store=FileOAuthStateStore(expiration_seconds=600, base_dir="/tmp")
 )
 
 app = App(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    token=SLACK_BOT_TOKEN,
+    signing_secret=SLACK_SIGNING_SECRET,
     oauth_settings=slack_oauth_settings,
 #    process_before_response=True,
 )
 handler = SlackRequestHandler(app)
 
-# Setup GeminiAI instance
-gemini_api_key = os.environ["GEMINI_API_KEY"]
-gemini_ai_instance = GeminiAI(gemini_api_key=gemini_api_key,candidate_count=1, max_output_tokens=8192, temperature=0.0)
-
-# Setup WeatherFlow instance
-wf_api_key = os.environ.get("WF_API_KEY")
-wf_station_id = os.environ.get("WF_STATION_ID")
-weatherflow_instance = WeatherFlow(wf_api_key=wf_api_key)
-
-# Setup Slack instance
+# Setup Slack Local Library instance
 slack_instance = Slack()
 
+# Setup GeminiAI instance
+#######################################
+
+gemini_ai_instance = GeminiAI(
+    gemini_api_key=GEMINI_API_KEY,
+    candidate_count=GEMINI_CANDIDATE_COUNT, 
+    max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS, 
+    temperature=GEMINI_TEMPERATURE
+    )
+
+# Setup WeatherFlow instance
+#######################################
+
+weatherflow_instance = WeatherFlow(wf_api_key=WF_API_KEY)
+
+
+# Helper functions
+#######################################
+
+# ToDo, move to Slack Library
 def get_bot_user_id(app):
     try:
         auth_info = app.client.auth_test(token=app._token)
@@ -111,7 +161,7 @@ def bard_command(ack, respond, command):
 def wf_command(ack, respond, command):
     ack()
 
-    station_id = wf_station_id
+    station_id = WF_STATION_ID
 
     if command["text"] is not None and command["text"] != "":
         logging.debug("wf_command received: %s", command["text"])
