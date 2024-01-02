@@ -31,7 +31,15 @@ GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 slack_oauth_settings = OAuthSettings(
     client_id=os.environ["SLACK_CLIENT_ID"],
     client_secret=os.environ["SLACK_CLIENT_SECRET"],
-    scopes=["channels:read", "channels:history", "commands", "users:read"],
+    scopes=[
+        "channels:read", 
+        "channels:history", 
+        "commands", 
+        "users:read",
+        "app_mentions:read",
+        "chat:write",
+        "im:history",
+        ],
     # installation_store=FileInstallationStore(base_dir="/tmp"),
     installation_store=GCPStorageInstallationStore(bucket_name=GCS_BUCKET_NAME,client_id=os.environ["SLACK_CLIENT_ID"]),
     state_store=FileOAuthStateStore(expiration_seconds=600, base_dir="/tmp")
@@ -57,6 +65,9 @@ weatherflow_instance = WeatherFlow(wf_api_key=wf_api_key)
 # Setup Slack instance
 slack_instance = Slack()
 
+##############
+# Slack Slash Commands
+##############
 @app.command("/bard")
 @app.command("/zbard")
 def bard_command(ack, respond, command):
@@ -81,11 +92,7 @@ def bard_command(ack, respond, command):
             "blocks": slack_message
         })
     except Exception as e:
-            logging.error(f"Error sending to Slack: %e", e)
-            respond({
-                "response_type": "ephemeral",
-                "text": f"Error sending to Slack: {e}",
-            })
+            logging.error("Error sending to Slack: %e", e)
 
 
 @app.command("/wf")
@@ -112,6 +119,37 @@ def wf_command(ack, respond, command):
         "text": f"{wf_response}",  # Fallback text
         "blocks": slack_message
     })
+
+##############
+# Slack Messages and Events
+##############
+@app.message("bard")
+def bard_say(message, say):
+    query = message["text"]
+    user_id = message["user"]
+
+    ai_response = gemini_ai_instance.query_ai(query)
+
+    formatted_response = slack_instance.format_response(f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}")
+
+    slack_message = formatted_response   
+
+    logging.info(slack_message)
+    
+    try:
+        say({
+            "response_type": "in_channel",
+            "text": f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}",  # Fallback text
+            "blocks": slack_message
+        })
+    except Exception as e:
+            logging.error("Error sending to Slack: %e", e)
+
+# Handle events
+@app.event("message")
+@app.event("app_mention")
+def handle_message_events(body):
+    logging.debug(body)
 
 # Entry point function for Functions Framework when running on GCP Cloud Functions
 @functions_framework.http

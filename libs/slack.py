@@ -18,13 +18,18 @@ class Slack:
         for response in responses:
             # Assuming each response is in mrkdwn format
             formatted_response.append({"type": "divider"})
-            formatted_response.append({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": response
-                }
-            })
+
+            # Split response into chunks of 3000 characters
+            chunks = [response[i:i + 3000] for i in range(0, len(response), 3000)]
+
+            for chunk in chunks:
+                formatted_response.append({
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": chunk
+                    }
+                })
 
         formatted_response.append({"type": "divider"})
         return formatted_response

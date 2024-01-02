@@ -67,13 +67,28 @@ Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python
 
 Create a new Slack App
 
-This will provide the Slack tokens/secrets etc. You will also need set up a Bot Token (xoxb-) and Bot Token Scopes - I set 'commands' and 'users:read'.
+This will provide the Slack tokens/secrets etc. You will also need set up a Bot Token (xoxb-) and add the App Level Scopes:
+   - connections:write
+
+Then set the following **Oauth & Permissions**, Bot Token Scopes:
+   - channels:read
+   - channels:history 
+   - commands,
+   - users:read,
+   - app_mentions:read",
+   - chat:write,
+   - im:history,
 
 Create two new slash commands, one for /bard and one for /wf
 
 The URL for the above slash commands will be provided when you deploy the Google Cloud Function. Be sure to append /slack/events on the end. EG
 
 https://australia-southeast1-tasty-koala-123456.cloudfunctions.net/chatbot/slack/events
+
+Use this same URL in **Event Subscriptions** along with the following bot subscription events:
+    - app_mention
+    - message.channels
+    - message.im
 
 ### Get a Google AI key
 
