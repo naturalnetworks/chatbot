@@ -141,13 +141,25 @@ def bard_say(message, say, event):
     bot_user_id = get_bot_user_id(app)
 
     if message:
+        if Slack.is_duplicate(message):
+            logging.info("Duplicate message ID: %s ignored", message["ts"])
+            return
+
+        logging.debug("Message ID: %s", message["ts"])
+
         query = message.get("text", None)
         user_id = message.get("user", "")
-        logging.info("bard_say received a message for %s: %s asked %s", bot_user_id, user_id, query)
+        logging.info("bard_say received a message for %s, %s asked: %s", bot_user_id, user_id, query)
     elif event:     
+        if Slack.is_duplicate(event):
+            logging.info("Duplicate message ID: %s ignored", message["ts"])
+            return
+
+        logging.debug("Event ID: %s", event["ts"])
+
         query = event.get("text", None)
         user_id = event.get("user", "")
-        logging.info("bard_say received an event for %s: %s asked %s", bot_user_id, user_id, query)
+        logging.info("bard_say received an event for %s, %s asked: %s", bot_user_id, user_id, query)
     else:
         say({
             "response_type": "in_channel",

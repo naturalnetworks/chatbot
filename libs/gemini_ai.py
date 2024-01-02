@@ -2,6 +2,7 @@ import os
 import logging
 import google.generativeai as genai
 
+
 class GeminiAI:
     def __init__(self, gemini_api_key=None,candidate_count=1, max_output_tokens=8192, temperature=1.0):
        
@@ -44,10 +45,18 @@ class GeminiAI:
                     max_output_tokens=self.max_output_tokens,
                     temperature=self.temperature)
             )
+
             return ai_query_response.text
 
+        except genai.types.generation_types.BlockedPromptException as e:
+            # Handle BlockedPromptException
+            logging.error("Error generating AI response: %s", e)
+            return f"Error generating AI response. Blocked: {e}"
+
         except Exception as e:
-            logging.error(f"Error generating AI response: {e}")
+            # Handle other exceptions
+            logging.error("Error generating AI response: %s", e)
+
             return "Error generating AI response. Please try again later."
 
 # Example of using the GeminiAI class with custom parameters

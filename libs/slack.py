@@ -1,7 +1,13 @@
 import re
 import logging
+from collections import deque
+
 
 class Slack:
+
+    # Define a deque to store the last N messages
+    last_messages = deque(maxlen=10)
+
     @staticmethod
     def format_response(responses):
         """
@@ -104,3 +110,19 @@ class Slack:
             return user_info["user"]["profile"]["real_name_normalized"]
         except Exception as e:
             return "Unknown User"
+
+    @staticmethod
+    def is_duplicate(message, key="ts"):
+        """
+        Check if a message is a duplicate based on a specified key.
+
+        :param message: Message to check.
+        :param key: Key to identify uniqueness (default is "ts").
+        :return: True if the message is a duplicate, False otherwise.
+        """
+        message_key = message.get(key)
+        if message_key and message_key in Slack.last_messages:
+            return True
+        Slack.last_messages.append(message_key)
+        return False
+
