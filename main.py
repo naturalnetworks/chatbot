@@ -65,6 +65,17 @@ weatherflow_instance = WeatherFlow(wf_api_key=wf_api_key)
 # Setup Slack instance
 slack_instance = Slack()
 
+def get_bot_user_id(app):
+    try:
+        auth_info = app.client.auth_test(token=app._token)
+        bot_user_id = auth_info["user_id"]
+        return bot_user_id
+    except SlackApiError as e:
+        logging.error("Error retrieving bot user ID: %s", str(e.response.data))
+        # Handle the error condition, maybe fallback to a default value or notify the user
+        return None
+
+
 ##############
 # Slack Slash Commands
 ##############
@@ -92,7 +103,7 @@ def bard_command(ack, respond, command):
             "blocks": slack_message
         })
     except Exception as e:
-            logging.error("Error sending to Slack: %e", e)
+            logging.error("Error sending to Slack: %s", e)
 
 
 @app.command("/wf")
@@ -126,12 +137,17 @@ def wf_command(ack, respond, command):
 @app.message("bard")
 @app.event("app_mention")
 def bard_say(message, say, event):
+
+    bot_user_id = get_bot_user_id(app)
+
     if message:
         query = message.get("text", None)
         user_id = message.get("user", "")
-    elif event:
+        logging.info("bard_say received a message for %s: %s asked %s", bot_user_id, user_id, query)
+    elif event:     
         query = event.get("text", None)
         user_id = event.get("user", "")
+        logging.info("bard_say received an event for %s: %s asked %s", bot_user_id, user_id, query)
     else:
         say({
             "response_type": "in_channel",
@@ -139,8 +155,14 @@ def bard_say(message, say, event):
         })
         return
 
-    if query:
+    if query and query != "" and query != "bard" and query != f"<@{bot_user_id}>":
         ai_response = gemini_ai_instance.query_ai(query)
+    else:
+        say({
+            "response_type": "in_channel",
+            "text": "Hi :wave:"
+        })
+        return
 
     # Check if user_id is not an empty string before formatting the response
     if user_id:
@@ -160,7 +182,7 @@ def bard_say(message, say, event):
             "blocks": slack_message
         })
     except Exception as e:
-            logging.error("Error sending to Slack: %e", e)
+            logging.error("Error sending to Slack: %s", e)
 
 # Handle events
 @app.event("message")
