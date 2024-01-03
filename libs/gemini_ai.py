@@ -40,7 +40,15 @@ class GeminiAI:
         self.safety_danger = safety_danger
         self.safety_hate = safety_hate
 
-    def query_ai(self, query):
+        # Dictionary to store user-specific chat sessions
+        self.user_chat_sessions = {}
+
+    def start_user_chat(self, user_id):
+        # Create a new chat session for the user
+        chat_session = self.model.start_chat(history=[])
+        self.user_chat_sessions[user_id] = chat_session
+
+    def query_ai(self, user_id, query):
         """
         Query the AI model with a given query and return the response.
 
@@ -53,6 +61,13 @@ class GeminiAI:
         """
         try:
 
+            # Check if the user has an existing chat session
+            if user_id not in self.user_chat_sessions:
+                self.start_user_chat(user_id)
+
+            # Get the user's chat session
+            user_chat_session = self.user_chat_sessions[user_id]
+
             safety_settings = {
                 'harassment': self.safety_harrassment,
                 'hate': self.safety_hate,
@@ -60,7 +75,7 @@ class GeminiAI:
                 'danger': self.safety_danger
             }
 
-            ai_query_response = self.chat.send_message(
+            ai_query_response = user_chat_session.send_message(
                 query,
                 generation_config=genai.types.GenerationConfig(
                     candidate_count=self.candidate_count,

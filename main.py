@@ -144,7 +144,7 @@ def bard_command(ack, respond, command):
     query = command["text"]
     user_id = command["user_id"]
 
-    ai_response = gemini_ai_instance.query_ai(query)
+    ai_response = gemini_ai_instance.query_ai(user_id, query)
 
     username = slack_instance.get_user_info(app, user_id)
 
@@ -226,7 +226,7 @@ def bard_say(message, say, event):
         return
 
     if query and query != "" and query != "bard" and query != f"<@{bot_user_id}>":
-        ai_response = gemini_ai_instance.query_ai(query)
+        ai_response = gemini_ai_instance.query_ai(user_id, query)
     else:
         say({
             "response_type": "in_channel",
