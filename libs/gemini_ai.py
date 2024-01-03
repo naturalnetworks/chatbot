@@ -4,7 +4,16 @@ import google.generativeai as genai
 
 
 class GeminiAI:
-    def __init__(self, gemini_api_key=None,candidate_count=1, max_output_tokens=8192, temperature=1.0):
+    def __init__(self,
+                    gemini_api_key=None,
+                    candidate_count=1,
+                    max_output_tokens=8192,
+                    temperature=1.0,
+                    safety_sex='unspecified',
+                    safety_harrassment='unspecified',
+                    safety_danger='unspecified',
+                    safety_hate='unspecified'
+                ):
        
         if gemini_api_key == None:
             logging.error("Gemini API Key not provided")
@@ -26,6 +35,11 @@ class GeminiAI:
         self.max_output_tokens = max_output_tokens
         self.temperature = temperature
 
+        self.safety_sex = safety_sex
+        self.safety_harrassment = safety_harrassment
+        self.safety_danger = safety_danger
+        self.safety_hate = safety_hate
+
     def query_ai(self, query):
         """
         Query the AI model with a given query and return the response.
@@ -38,13 +52,22 @@ class GeminiAI:
         https://ai.google.dev/docs/concepts#model_parameters.
         """
         try:
+
+            safety_settings = {
+                'harassment': self.safety_harrassment,
+                'hate': self.safety_hate,
+                'sex': self.safety_sex,
+                'danger': self.safety_danger
+            }
+
             ai_query_response = self.chat.send_message(
                 query,
                 generation_config=genai.types.GenerationConfig(
                     candidate_count=self.candidate_count,
                     max_output_tokens=self.max_output_tokens,
-                    temperature=self.temperature)
-            )
+                    temperature=self.temperature),
+                safety_settings=safety_settings
+                )
 
             return ai_query_response.text
 

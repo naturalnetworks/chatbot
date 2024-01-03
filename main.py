@@ -39,9 +39,13 @@ SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
 
 # Your Gemini API key and Settings
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-GEMINI_CANDIDATE_COUNT = os.getenv('CANDIDATE_COUNT') # Optional
-GEMINI_MAX_OUTPUT_TOKENS = os.getenv('MAX_OUTPUT_TOKENS') # Optional
-GEMINI_TEMPERATURE = os.getenv('TEMPERATURE') # Optional
+GEMINI_CANDIDATE_COUNT = int(os.getenv('GEMINI_CANDIDATE_COUNT', '1'))
+GEMINI_MAX_OUTPUT_TOKENS = int(os.getenv('GEMINI_MAX_OUTPUT_TOKENS', '8192'))
+GEMINI_TEMPERATURE = float(os.getenv('GEMINI_TEMPERATURE', '0.9'))
+GEMINI_SAFETY_HARRASSMENT = os.getenv('GEMINI_SAFETY_HARRASSMENT') # Optional
+GEMINI_SAFETY_SEX = os.getenv('GEMINI_SAFETY_SEX') # Optional
+GEMINI_SAFETY_DANGER = os.getenv('GEMINI_SAFETY_DANGER') # OPtional
+GEMINI_SAFETY_HATE = os.getenv('GEMINI_SAFETY_HATE') # Optional
 
 # Validate that variables have values
 missing_variables = [var_name for var_name, var in
@@ -102,7 +106,11 @@ gemini_ai_instance = GeminiAI(
     gemini_api_key=GEMINI_API_KEY,
     candidate_count=GEMINI_CANDIDATE_COUNT, 
     max_output_tokens=GEMINI_MAX_OUTPUT_TOKENS, 
-    temperature=GEMINI_TEMPERATURE
+    temperature=GEMINI_TEMPERATURE,
+    safety_harrassment=GEMINI_SAFETY_HARRASSMENT,
+    safety_sex=GEMINI_SAFETY_SEX,
+    safety_danger=GEMINI_SAFETY_DANGER,
+    safety_hate=GEMINI_SAFETY_HATE
     )
 
 # Setup WeatherFlow instance
