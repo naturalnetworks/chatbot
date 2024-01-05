@@ -112,6 +112,13 @@ class Slack:
             return "Unknown User"
 
     @staticmethod
+    def format_user_mention(user_id):
+        if user_id is not None and user_id != "":
+            return f"<@{user_id}>"
+        else:
+            return None
+
+    @staticmethod
     def is_duplicate(message, key="ts"):
         """
         Check if a message is a duplicate based on a specified key.
@@ -126,3 +133,13 @@ class Slack:
         Slack.last_messages.append(message_key)
         return False
 
+    @staticmethod
+    def get_bot_user_id(app):
+        try:
+            auth_info = app.client.auth_test(token=app._token)
+            bot_user_id = auth_info["user_id"]
+            return bot_user_id
+        except SlackApiError as e:
+            logging.error("Error retrieving bot user ID: %s", str(e.response.data))
+            # Handle the error condition, maybe fallback to a default value or notify the user
+            return None

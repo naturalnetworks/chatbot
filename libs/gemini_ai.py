@@ -8,7 +8,7 @@ class GeminiAI:
                     gemini_api_key=None,
                     candidate_count=1,
                     max_output_tokens=8192,
-                    temperature=1.0,
+                    temperature=0.9,
                     safety_sex='unspecified',
                     safety_harrassment='unspecified',
                     safety_danger='unspecified',

@@ -1,6 +1,7 @@
 # Import system modules
 import os
 import logging
+import re
 
 # Import third-party modules
 from slack_bolt import App
@@ -119,28 +120,64 @@ gemini_ai_instance = GeminiAI(
 weatherflow_instance = WeatherFlow(wf_api_key=WF_API_KEY)
 
 
-# Helper functions
-#######################################
+def process_bard_request(data, say_function):
+    if Slack.is_duplicate(data):
+        logging.info("Duplicate message/event ID: %s ignored", data["ts"])
+        return
 
-# ToDo, move to Slack Library
-def get_bot_user_id(app):
+    bot_user_id = Slack.get_bot_user_id(app)
+
+    if 'bot_id' in data:
+        logging.info("Received message from another app: %s, ignoring", data.get("bot_id", None))
+        return
+
+    logging.debug("ID: %s", data["ts"])
+
+    query = data.get("text", None)
+    user_id = Slack.format_user_mention(data.get("user", ""))
+
+    logging.info("bard_say received a message/event for %s, %s asked: %s", bot_user_id, user_id, query)
+
+    if query and query != "" and query != "bard" and query != f"<@{bot_user_id}>":
+
+        ai_response = gemini_ai_instance.query_ai(user_id, query)
+        
+    else:
+        say_function({
+            "response_type": "in_channel",
+            "text": "Hi :wave:"
+        })
+        return
+
+    # Check if user_id is not an empty string before formatting the response
+    if user_id:
+        formatted_response = slack_instance.format_response(f"{user_id}, {slack_instance.adjust_markdown_for_slack(ai_response)}")
+    else:
+        # Handle the case where user_id is an empty string
+        formatted_response = slack_instance.format_response(ai_response)
+
+    slack_message = formatted_response
+    logging.info(slack_message)
+
     try:
-        auth_info = app.client.auth_test(token=app._token)
-        bot_user_id = auth_info["user_id"]
-        return bot_user_id
-    except SlackApiError as e:
-        logging.error("Error retrieving bot user ID: %s", str(e.response.data))
-        # Handle the error condition, maybe fallback to a default value or notify the user
-        return None
+        say_function({
+            "response_type": "in_channel",
+            "text": f"{user_id}, {slack_instance.adjust_markdown_for_slack(ai_response)}",  # Fallback text
+            "blocks": slack_message
+        })
+    except Exception as e:
+        logging.error("Error sending to Slack: %s", e)
 
 
 ##############
 # Slack Slash Commands
 ##############
+
 @app.command("/bard")
 @app.command("/zbard")
 def bard_command(ack, respond, command):
     ack()
+    
     query = command["text"]
     user_id = command["user_id"]
 
@@ -150,7 +187,7 @@ def bard_command(ack, respond, command):
 
     formatted_response = slack_instance.format_response([f"*{username}* asked \"_{query}_\"", slack_instance.adjust_markdown_for_slack(ai_response)])
 
-    slack_message = formatted_response   
+    slack_message = formatted_response
 
     logging.info(slack_message)
     
@@ -192,69 +229,19 @@ def wf_command(ack, respond, command):
 ##############
 # Slack Messages and Events
 ##############
+
+# Bard Message Route
 @app.message("bard")
-@app.event("app_mention")
-def bard_say(message, say, event):
-
-    bot_user_id = get_bot_user_id(app)
-
-    if message:
-        if Slack.is_duplicate(message):
-            logging.info("Duplicate message ID: %s ignored", message["ts"])
-            return
-
-        logging.debug("Message ID: %s", message["ts"])
-
-        query = message.get("text", None)
-        user_id = message.get("user", "")
-        logging.info("bard_say received a message for %s, %s asked: %s", bot_user_id, user_id, query)
-    elif event:     
-        if Slack.is_duplicate(event):
-            logging.info("Duplicate message ID: %s ignored", message["ts"])
-            return
-
-        logging.debug("Event ID: %s", event["ts"])
-
-        query = event.get("text", None)
-        user_id = event.get("user", "")
-        logging.info("bard_say received an event for %s, %s asked: %s", bot_user_id, user_id, query)
-    else:
-        say({
-            "response_type": "in_channel",
-            "text": "Hi :wave:"
-        })
-        return
-
-    if query and query != "" and query != "bard" and query != f"<@{bot_user_id}>":
-        ai_response = gemini_ai_instance.query_ai(user_id, query)
-    else:
-        say({
-            "response_type": "in_channel",
-            "text": "Hi :wave:"
-        })
-        return
-
-    # Check if user_id is not an empty string before formatting the response
-    if user_id:
-        formatted_response = slack_instance.format_response(f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}")
-    else:
-        # Handle the case where user_id is an empty string
-        formatted_response = slack_instance.format_response(ai_response)
-
-    slack_message = formatted_response
-
-    logging.info(slack_message)
+def handle_bard_message(message, say):
     
-    try:
-        say({
-            "response_type": "in_channel",
-            "text": f"<@{user_id}>, {slack_instance.adjust_markdown_for_slack(ai_response)}",  # Fallback text
-            "blocks": slack_message
-        })
-    except Exception as e:
-            logging.error("Error sending to Slack: %s", e)
+    process_bard_request(message, say)
 
-# Handle events
+# Bard Mention Route
+@app.event("app_mention")
+def handle_bard_event(event, say):
+    process_bard_request(event, say)
+
+# Handle other events
 @app.event("message")
 def handle_message_events(body):
     logging.debug(body)
