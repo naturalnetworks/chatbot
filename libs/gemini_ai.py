@@ -25,7 +25,8 @@ class GeminiAI:
 
         # gemini-pro: optimized for text-only prompts.
         # gemini-pro-vision: optimized for text-and-images prompts.
-        self.model = genai.GenerativeModel('gemini-pro')
+        # gemini-1.5-pro-latest: updated gemini-pro model with more capabilities
+        self.model = genai.GenerativeModel('gemini-1.5-pro-latest')
 
         # Gemini Chat Conversations
         self.chat = self.model.start_chat(history=[])
