@@ -236,8 +236,9 @@ def handle_bard_message(message, say):
     
     process_bard_request(message, say)
 
-# Bard Mention Route
+# Bard Event Route
 @app.event("app_mention")
+@app.event("message.im")
 def handle_bard_event(event, say):
     process_bard_request(event, say)
 
