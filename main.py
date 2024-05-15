@@ -238,14 +238,19 @@ def handle_bard_message(message, say):
 
 # Bard Event Route
 @app.event("app_mention")
-@app.event("message.im")
 def handle_bard_event(event, say):
     process_bard_request(event, say)
 
+
 # Handle other events
 @app.event("message")
-def handle_message_events(body):
-    logging.debug(body)
+def handle_message_events(event, say, body):
+
+    if event.get("channel_type") == "im":
+        process_bard_request(event, say)
+    else:
+        logging.debug(body)
+
 
 # Entry point function for Functions Framework when running on GCP Cloud Functions
 @functions_framework.http
