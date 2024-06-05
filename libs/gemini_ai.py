@@ -1,6 +1,7 @@
 import os
 import logging
 import google.generativeai as genai
+from libs.firestore_handler import FirestoreHandler
 
 
 class GeminiAI:
@@ -12,7 +13,16 @@ class GeminiAI:
                     safety_sex='unspecified',
                     safety_harrassment='unspecified',
                     safety_danger='unspecified',
-                    safety_hate='unspecified'
+                    safety_hate='unspecified',
+                    system_instruction=["You are a chatbot.",
+                                        "Your name is bard.",
+                                        "You are an expert at responding to questions and providing advice.",
+                                        "You are helpful, creative, clever, and very friendly.",
+                                        "You provide code examples in full.",
+                                        "You provide references where applicable.",
+                                        "You provide a clear, concise, actionable, relevant, and informative response.",
+                                        "Your output follows the Australian style guide."
+                                        ]
                 ):
        
         if gemini_api_key == None:
@@ -26,7 +36,7 @@ class GeminiAI:
         # gemini-pro: optimized for text-only prompts.
         # gemini-pro-vision: optimized for text-and-images prompts.
         # gemini-1.5-pro-latest: updated gemini-pro model with more capabilities
-        self.model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        self.model = genai.GenerativeModel('gemini-1.5-pro-latest', system_instruction=system_instruction)
 
         # Gemini Chat Conversations
         self.chat = self.model.start_chat(history=[])
@@ -44,10 +54,36 @@ class GeminiAI:
         # Dictionary to store user-specific chat sessions
         self.user_chat_sessions = {}
 
+        # Initialize Firestore Handler
+        self.firestore_handler = FirestoreHandler() # Dictionary to store user-specific chat sessions
+        self.user_chat_sessions = {}
+
     def start_user_chat(self, user_id):
-        # Create a new chat session for the user
-        chat_session = self.model.start_chat(history=[])
+        """
+        Start a new chat session for a given user.
+
+        Args:
+            user_id (str): The ID of the user starting the chat session.
+
+        Returns:
+            None
+
+        This function retrieves the chat history of the user from Firestore and starts a new chat session using the
+        loaded history. The chat session is then stored in the `user_chat_sessions` dictionary, indexed by the user's ID.
+
+        Note:
+            - The `firestore_handler` attribute is used to load the chat history from Firestore.
+            - The `model` attribute is used to start a new chat session.
+            - The `user_chat_sessions` dictionary is used to store the chat sessions for each user.
+        """
+        chat_history = self.firestore_handler.load_chat_history(user_id)
+        chat_session = self.model.start_chat(history=chat_history)
         self.user_chat_sessions[user_id] = chat_session
+
+#    def start_user_chat(self, user_id):
+#        # Create a new chat session for the user
+#        chat_session = self.model.start_chat(history=[])
+#        self.user_chat_sessions[user_id] = chat_session
 
     def query_ai(self, user_id, query):
         """
@@ -84,6 +120,9 @@ class GeminiAI:
                     temperature=self.temperature),
                 safety_settings=safety_settings
                 )
+
+            # Save the interaction to Firestore
+            self.firestore_handler.save_chat_turn(user_id, query, ai_query_response.text)
 
             return ai_query_response.text
 

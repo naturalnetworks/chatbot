@@ -2,7 +2,7 @@
 
 This repository contains a Slack bot implemented in Python using the Slack Bolt framework. The bot leverages the Google Gemini API for text generation and integrates with the WeatherFlow API to provide weather reports. 
 
-It is designed to run as a Google Cloud Function.
+It is designed to run as a Google Cloud Function or as a Cloud Run instance.
 
 ## Notes
 
@@ -53,7 +53,7 @@ The bot can fetch real-time weather reports from a WeatherFlow Tempest station u
 
 ### Google Compute Platform
 
-Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python to get an idea on what's required to set up GCP to host your Cloud Function.
+Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python to get an idea on what's required to set up GCP to host your Cloud Function/Cloud Run application.
 
 ### Dependencies
 
@@ -62,6 +62,7 @@ Take a look at https://cloud.google.com/functions/docs/create-deploy-http-python
 - Google Generative AI
 - Functions Framework
 - Requests
+- Google Firebase (Firestore)
 
 ### Setup Slack
 
@@ -152,6 +153,8 @@ This is called during the deploy/build gcloud commands and creates the environme
 
 ### Create a Google Cloud Storage bucket
 
+The storage bucket is used to store the Slack App things.
+
 Here the --location is set to a region, by default it is 'us' and will be multi-region replication. \
 Single region means cheaper although not as available as the multi-region/dual-region.
 
@@ -162,6 +165,16 @@ gcloud storage buckets create gs://<GCS_BUCKET_NAME>  \
 ```
 Make sure the name matches what has been set in the environment variable GCS_BUCKET_NAME. \
 See https://cloud.google.com/storage/docs/creating-buckets
+
+### Create a Google Firestore Database
+
+Per user chat histories are stored in Firestore so that they persist between cold starts etc. 
+
+Firestore setup is simple - it will automatically create a (default) database and the collections with in will be generated on the fly.
+
+```
+gcloud firestore databases create --location=nam5
+```
 
 ### Deploy to your GCP project to Cloud Functions
 
