@@ -2,9 +2,6 @@ import os
 import firebase_admin
 from firebase_admin import firestore
 
-"""
-Note that Firestore will use the (default) database in the google project
-"""
 
 class FirestoreHandler:
     def __init__(self):
@@ -15,17 +12,24 @@ class FirestoreHandler:
     def load_chat_history(self, user_id):
         """Loads chat history from Firestore for a given user."""
         # Use a single string for collection name
-        docs = self.db.collection(f'{self.database_name}_{self.collection_name}') \
+        docs = self.db.collection(f'{self.collection_name}') \
                .where('user_id', '==', user_id).stream()
-        history = [(doc.get('user'), doc.get('ai')) for doc in docs]
+
+        # history = [(doc.get('user'), doc.get('ai')) for doc in docs]
+
+        history = []
+        for doc in docs:
+            history.append(doc.get('user'))
+            history.append(doc.get('model'))
+        
         return history
 
-    def save_chat_turn(self, user_id, user_message, ai_response):
+    def save_chat_turn(self, user_id, user_message, model_response):
         """Saves a single turn of the chat to Firestore."""
         data = {
             'user_id': user_id,
             'user': user_message,
-            'ai': ai_response
+            'model': model_response
         }
         # Use a single string for collection name
-        self.db.collection(f'{self.database_name}_{self.collection_name}').add(data)
+        self.db.collection(f'{self.collection_name}').add(data)

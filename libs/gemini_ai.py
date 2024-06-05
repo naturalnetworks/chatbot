@@ -77,7 +77,17 @@ class GeminiAI:
             - The `user_chat_sessions` dictionary is used to store the chat sessions for each user.
         """
         chat_history = self.firestore_handler.load_chat_history(user_id)
-        chat_session = self.model.start_chat(history=chat_history)
+
+        # Format history correctly for Gemini
+        formatted_history = []
+        for i, message in enumerate(chat_history):
+            role = "user" if i % 2 == 0 else "model"
+            formatted_history.append({
+                "role": role,
+                "parts": [{"text": message}] 
+            })
+
+        chat_session = self.model.start_chat(history=formatted_history)
         self.user_chat_sessions[user_id] = chat_session
 
 #    def start_user_chat(self, user_id):
