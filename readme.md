@@ -170,11 +170,44 @@ See https://cloud.google.com/storage/docs/creating-buckets
 
 Per user chat histories are stored in Firestore so that they persist between cold starts etc. 
 
-Firestore setup is simple - it will automatically create a (default) database and the collections with in will be generated on the fly.
+Firestore setup is simple:
 
 ```
 gcloud firestore databases create --location=nam5
 ```
+
+However since this script keeps a FIFO window of 100 entries per user, you need to manually create two indexes in Firebase
+
+Create a json file called 'firestore.indexes.json':
+
+'''
+{
+  "indexes": [
+    {
+      "collection": "chat_histories",
+      "fields": [
+        { "fieldPath": "user_id", "direction": "ASCENDING" },
+        { "fieldPath": "timestamp", "direction": "ASCENDING" }
+      ]
+    },
+    {
+      "collection": "chat_histories",
+      "fields": [
+        { "fieldPath": "user_id", "direction": "ASCENDING" },
+        { "fieldPath": "timestamp", "direction": "DESCENDING" }
+      ]
+    }
+  ]
+}
+'''
+
+and run 
+
+'''
+firebase deploy --only firestore:indexes
+'''
+
+Otherwise you can go into your Firebase console and create the indexes there. You'll find links in the logs as the Ai will throw an error until the two indices have been created.
 
 ### Deploy to your GCP project to Cloud Functions
 
