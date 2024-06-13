@@ -146,6 +146,29 @@ class GeminiAI:
 
             return "Error generating AI response. Please try again later."
 
+    # def generate_image(self, prompt: str) -> str:
+    #     """Generates an image using the Gemini Image Generation API.
+    #     Args:
+    #          prompt: The text prompt to generate the image from.
+
+    #     Returns:
+    #         The URL of the generated image.
+    #     """
+    #     try:
+    #         response = genai.generate_image(  # Adjust based on the actual API call
+    #             model='image-generation',  # Or the specific Gemini image model
+    #             prompt=prompt,
+    #             # Add any other parameters like image size, number of images, etc.
+    #         )
+
+    #         # Extract the image URL from the response
+    #         image_url = response.artifacts[0].uri 
+    #         return image_url
+
+    #     except Exception as e:
+    #         logging.error("Error generating image: %s", e)
+    #         return "Sorry, there was an error generating the image."
+
 # Example of using the GeminiAI class with custom parameters
 if __name__ == "__main__":
     gemini_ai_instance = GeminiAI(gemini_api_key=os.environ["GEMINI_API_KEY"],candidate_count=1, max_output_tokens=200, temperature=0.2)

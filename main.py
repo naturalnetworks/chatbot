@@ -226,6 +226,17 @@ def wf_command(ack, respond, command):
         "blocks": slack_message
     })
 
+# @app.command("/bardimage")
+# def handle_image_command(ack, respond, command):
+#     ack()  # Acknowledge the command receipt
+
+#     prompt = command["text"]  # Get the user's prompt from the command
+
+#     image_url = gemini_ai_instance.generate_image(prompt)
+
+#     # Send the image URL back to Slack
+#     respond(image_url) 
+
 ##############
 # Slack Messages and Events
 ##############

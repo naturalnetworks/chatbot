@@ -8,7 +8,7 @@ class FirestoreHandler:
         firebase_admin.initialize_app()
         self.db = firestore.client()
         self.collection_name = os.getenv('FIRESTORE_COLLECTION_NAME', 'chat_histories')
-        self.max_entries = 100  # Maximum number of entries to store
+        self.max_entries = 25  # Maximum number of entries to store
 
     def load_chat_history(self, user_id):
         """Loads chat history from Firestore for a given user,
