@@ -121,6 +121,31 @@ weatherflow_instance = WeatherFlow(wf_api_key=WF_API_KEY)
 
 
 def process_bard_request(data, say_function):
+    """
+    Process a Bard request and generate a response using the Google Gemini API.
+
+    Args:
+        data (dict): The data containing the message/event information.
+        say_function (function): The function to send a response back to the channel.
+
+    Returns:
+        None: If the message/event is a duplicate or from another app.
+        None: If the query is empty or equal to "bard" or the bot user ID.
+
+    Raises:
+        None
+
+    Description:
+        This function processes a Bard request and generates a response using the Google Gemini API.
+        It checks if the message/event is a duplicate or from another app and returns None in such cases.
+        It then retrieves the query and user ID from the data.
+        If the query is not empty, not equal to "bard", and not equal to the bot user ID,
+        it calls the gemini_ai_instance.query_ai function to generate the AI response.
+        If the query is empty or equal to "bard" or the bot user ID, it sends a "Hi :wave:" message.
+        It then formats the response using the user_id and the AI response.
+        Finally, it sends the formatted response back to the channel using the say_function.
+
+    """
     if Slack.is_duplicate(data):
         logging.info("Duplicate message/event ID: %s ignored", data["ts"])
         return
@@ -176,6 +201,20 @@ def process_bard_request(data, say_function):
 @app.command("/bard")
 @app.command("/zbard")
 def bard_command(ack, respond, command):
+    """
+    A Slack command function that generates a response using the Google Gemini API and sends it back to the channel.
+    
+    Parameters:
+        - ack: Function to acknowledge the command.
+        - respond: Function to send a response back to the channel.
+        - command: A dictionary containing the command details, including the text and user ID.
+        
+    Returns:
+        None
+        
+    Raises:
+        Exception: If there is an error sending the response to Slack.
+    """
     ack()
     
     query = command["text"]
@@ -204,6 +243,13 @@ def bard_command(ack, respond, command):
 @app.command("/wf")
 @app.command("/zwf")
 def wf_command(ack, respond, command):
+    """
+    A Slack command function that retrieves weather information and sends it back to the channel.
+    Parameters:
+    - ack: Function to acknowledge the command.
+    - respond: Function to send a response back to the channel.
+    - command: The command object containing user input.
+    """
     ack()
 
     station_id = WF_STATION_ID
@@ -235,28 +281,80 @@ def wf_command(ack, respond, command):
 #     image_url = gemini_ai_instance.generate_image(prompt)
 
 #     # Send the image URL back to Slack
-#     respond(image_url) 
+#     respond(image_url)
 
 ##############
 # Slack Messages and Events
 ##############
 
 # Bard Message Route
-@app.message("bard")
-def handle_bard_message(message, say):
-    
-    process_bard_request(message, say)
+# @app.message("bard")
+# def handle_bard_message(message, say):
+#     """
+#     Handle the bard message event in Slack.
+
+#     Args:
+#         message (dict): The message data containing information about the bard message.
+#         say (function): The function to send a message back to Slack.
+
+#     Returns:
+#         None
+#     """
+#     logging.debug("handle_bard_message received message: %s", message)
+#     process_bard_request(message, say)
+
+@app.message(re.compile(r"\bbard\b", re.IGNORECASE))
+def handle_bard_message(message, say, context):
+    """
+    Handle the bard message event in Slack.
+
+    This function is triggered when a message containing the word "bard" (case-insensitive) is received in Slack. It checks if there is a match in the context and if so, it processes the bard request by calling the `process_bard_request` function with the message and `say` as arguments.
+
+    Args:
+        message (dict): The message data containing information about the bard message.
+        say (function): The function to send a message back to Slack.
+        context (dict): The context data containing information about the message and its matches.
+
+    Returns:
+        None
+    """
+    # Check if there's a match (the list won't be empty)
+    if context['matches']:
+        logging.debug("handle_bard_message received and matched message: %s", message)
+        process_bard_request(message, say)
 
 # Bard Event Route
 @app.event("app_mention")
 def handle_bard_event(event, say):
+    """
+    Handle the app mention event in Slack.
+
+    Args:
+        event (dict): The event data containing information about the app mention.
+        say (function): The function to send a message back to Slack.
+
+    Returns:
+        None
+    """
+    logging.debug("handle_bard_event received event: %s", event)
     process_bard_request(event, say)
 
 
 # Handle other events
 @app.event("message")
 def handle_message_events(event, say, body):
+    """
+    Handle message events in the Slack app.
 
+    Args:
+        event (dict): The event object containing information about the message.
+        say (function): The function to send a message to the Slack channel.
+        body (dict): The body of the request.
+
+    Returns:
+        None
+    """
+    logging.debug("handle_message_events received event: %s", event)
     if event.get("channel_type") == "im":
         process_bard_request(event, say)
     else:
