@@ -32,13 +32,8 @@ class GeminiAI:
         genai.configure(api_key=gemini_api_key)
     
 
-        # gemini-pro: optimized for text-only prompts.
-        # gemini-pro-vision: optimized for text-and-images prompts.
-        # gemini-1.5-pro-latest: updated gemini-pro model with more capabilities
-        # gemini-2.0-flash-exp: Flash means cheaper/faster. 2.0 is as good as pro 1.5 and in someways better
-        # self.model = genai.GenerativeModel('gemini-1.5-pro-latest', system_instruction=system_instruction)
-        # self.model = genai.GenerativeModel('gemini-exp-1114', system_instruction=system_instruction)
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp', system_instruction=system_instruction)
+        # See https://ai.google.dev/gemini-api/docs/models
+        self.model = genai.GenerativeModel('gemini-2.5-flash-preview-04-17', system_instruction=system_instruction)
 
         # Gemini Chat Conversations
         self.chat = self.model.start_chat(history=[])
