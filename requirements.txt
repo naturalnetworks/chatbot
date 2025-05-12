@@ -1,4 +1,4 @@
-functions-framework
+functions-framework==3.*
 slack-bolt==1.18.1
 google-generativeai
 requests==2.27.1
