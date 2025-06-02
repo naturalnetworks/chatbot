@@ -33,7 +33,7 @@ class GeminiAI:
     
 
         # See https://ai.google.dev/gemini-api/docs/models
-        self.model = genai.GenerativeModel('gemini-2.5-flash-preview-04-17', system_instruction=system_instruction)
+        self.model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20', system_instruction=system_instruction)
 
         # Gemini Chat Conversations
         self.chat = self.model.start_chat(history=[])
