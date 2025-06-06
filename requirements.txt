@@ -1,7 +1,8 @@
 functions-framework
 slack-bolt==1.18.1
-google-generativeai
-requests==2.27.1
+# google-generativeai
+google-genai
+requests
 Flask==3.0.0
 Werkzeug==3.0.1
 google-cloud-storage

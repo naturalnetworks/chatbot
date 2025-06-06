@@ -1,6 +1,8 @@
 import os
 import logging
-import google.generativeai as genai
+# import google.generativeai as genai
+from google import genai
+from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 from libs.firestore_handler import FirestoreHandler
 
 
@@ -24,19 +26,32 @@ class GeminiAI:
                                         ]
                 ):
        
-        if gemini_api_key == None:
+        if gemini_api_key is None:
             logging.error("Gemini API Key not provided")
             raise Exception("Gemini API Key not provided")
 
         # Instantiate the Google Gemini API
-        genai.configure(api_key=gemini_api_key)
-    
+        # genai.configure(api_key=gemini_api_key)
+        self.client = genai.Client(api_key=gemini_api_key)
 
+        self.gemini_model = "gemini-2.5-pro-preview-06-05"
+
+        self.google_search_tool = Tool(google_search = GoogleSearch())
+
+        self.system_instruction = system_instruction
+    
         # See https://ai.google.dev/gemini-api/docs/models
-        self.model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20', system_instruction=system_instruction)
+        # self.model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20', system_instruction=system_instruction)
+        # Access the model via the client instance
+        # self.model = self.client.generative_model('gemini-2.5-flash-preview-05-20', system_instruction=system_instruction)
 
         # Gemini Chat Conversations
-        self.chat = self.model.start_chat(history=[])
+        # self.chat = self.model.start_chat(history=[])
+        self.chat = self.client.chats.create(
+            model=self.gemini_model,
+            config=GenerateContentConfig(
+                system_instruction=system_instruction),
+        )
 
         # Configurable generation parameters
         self.candidate_count = candidate_count
@@ -84,8 +99,15 @@ class GeminiAI:
                 "parts": [{"text": message}] 
             })
 
-        chat_session = self.model.start_chat(history=formatted_history)
-        self.user_chat_sessions[user_id] = chat_session
+        # chat_session = self.model.start_chat(history=formatted_history)
+        self.chat = self.client.chats.create(
+            model=self.gemini_model,
+            history=formatted_history,
+            config=GenerateContentConfig(
+                system_instruction=self.system_instruction),
+        )
+            
+        self.user_chat_sessions[user_id] = self.chat
 
 #    def start_user_chat(self, user_id):
 #        # Create a new chat session for the user
@@ -121,11 +143,13 @@ class GeminiAI:
 
             ai_query_response = user_chat_session.send_message(
                 query,
-                generation_config=genai.types.GenerationConfig(
-                    candidate_count=self.candidate_count,
-                    max_output_tokens=self.max_output_tokens,
-                    temperature=self.temperature),
-                safety_settings=safety_settings
+#                generation_config=genai.types.GenerationConfig(
+#                    candidate_count=self.candidate_count,
+#                    max_output_tokens=self.max_output_tokens,
+#                   temperature=self.temperature),
+#                    tools=[self.google_search_tool],
+#                    response_modalities=["TEXT"],
+#                safety_settings=safety_settings
                 )
 
             # Save the interaction to Firestore
@@ -133,10 +157,10 @@ class GeminiAI:
 
             return ai_query_response.text
 
-        except genai.types.generation_types.BlockedPromptException as e:
-            # Handle BlockedPromptException
-            logging.error("Error generating AI response: %s", e)
-            return f"Error generating AI response. Blocked: {e}"
+#        except genai.types.generation_types.BlockedPromptException as e:
+#            # Handle BlockedPromptException
+#            logging.error("Error generating AI response: %s", e)
+#            return f"Error generating AI response. Blocked: {e}"
 
         except Exception as e:
             # Handle other exceptions
