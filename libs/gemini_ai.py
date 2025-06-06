@@ -34,9 +34,7 @@ class GeminiAI:
         # genai.configure(api_key=gemini_api_key)
         self.client = genai.Client(api_key=gemini_api_key)
 
-        self.gemini_model = "gemini-2.5-pro-preview-06-05"
-
-        self.google_search_tool = Tool(google_search = GoogleSearch())
+        self.gemini_model = "gemini-2.5-flash-preview-05-20"
 
         self.system_instruction = system_instruction
     
@@ -50,6 +48,10 @@ class GeminiAI:
         self.chat = self.client.chats.create(
             model=self.gemini_model,
             config=GenerateContentConfig(
+                tools=[
+                    # Use Google Search Tool
+                    Tool(google_search=GoogleSearch())
+                ],
                 system_instruction=system_instruction),
         )
 
@@ -104,6 +106,10 @@ class GeminiAI:
             model=self.gemini_model,
             history=formatted_history,
             config=GenerateContentConfig(
+                    tools=[
+                    # Use Google Search Tool
+                    Tool(google_search=GoogleSearch())
+                ],
                 system_instruction=self.system_instruction),
         )
             
